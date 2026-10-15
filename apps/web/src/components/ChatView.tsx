@@ -111,7 +111,15 @@ import { resolveProjectSettings } from "@t3tools/shared/projectSettings";
 import { resolveThreadReferenceCopyTarget } from "@t3tools/client-runtime/thread-reference";
 import { resolveTerminalSessionLabel } from "@t3tools/shared/terminalLabels";
 import { useAtomValue } from "@effect/atom-react";
-import { type SetStateAction, use, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  type SetStateAction,
+  use,
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { BackgroundThreadContext } from "./chat/backgroundThread";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { assistantCitationFromLocation } from "../lib/assistantCitationNavigation";
@@ -2161,16 +2169,37 @@ export default function ChatView(props: ChatViewProps) {
     setTimelineAnchor,
   });
 
+  // Keyed to thread changes and real drawer closes. A docked drawer hiding with
+  // its closed panel is left to the visibility effect below, which keeps focus
+  // the user placed outside the dock.
+  const isTerminalVisibleNow = useEffectEvent(() => terminalVisible);
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- schedules a frame to focus the composer DOM element when a thread opens with the terminal closed
   useEffect(() => {
-    if (embedded || !activeThread?.id || terminalVisible) return;
+    if (embedded || !activeThread?.id || (terminalUiState.terminalOpen && isTerminalVisibleNow()))
+      return;
     const frame = window.requestAnimationFrame(() => {
+      // The panel can open before this frame, e.g. proactively on thread entry,
+      // revealing the docked drawer and handing it focus.
+      if (isTerminalVisibleNow()) return;
       focusComposerStable();
     });
     return () => {
       window.cancelAnimationFrame(frame);
     };
-  }, [activeThread?.id, embedded, focusComposerStable, terminalVisible]);
+  }, [activeThread?.id, embedded, focusComposerStable, terminalUiState.terminalOpen]);
+
+  const dockHiddenWithPanel =
+    terminalDockEligible && terminalUiState.terminalOpen && !rightPanelOpen;
+  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- closing the panel unmounts a docked drawer and drops its DOM focus to the body; move it to the composer
+  useEffect(() => {
+    if (!dockHiddenWithPanel) return;
+    const frame = window.requestAnimationFrame(() => {
+      if (document.activeElement === document.body) focusComposerStable();
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [dockHiddenWithPanel, focusComposerStable]);
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- window focus listener that refocuses the composer after the window regains focus
   useEffect(() => {
