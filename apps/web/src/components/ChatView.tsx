@@ -2317,9 +2317,22 @@ export default function ChatView(props: ChatViewProps) {
     activeThreadRef,
     workspaceLayoutElement,
     !embedded,
-    terminalVisible,
+    terminalUiState.terminalOpen,
     isCoarsePointer ? ignoreComposerFocus : focusComposerStable,
   );
+
+  const dockHiddenWithPanel =
+    terminalDockEligible && terminalUiState.terminalOpen && !rightPanelOpen;
+  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- closing the panel unmounts a docked drawer and drops its DOM focus to the body; move it to the composer
+  useEffect(() => {
+    if (!dockHiddenWithPanel || isCoarsePointer) return;
+    const frame = window.requestAnimationFrame(() => {
+      if (document.activeElement === document.body) focusComposerStable();
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [dockHiddenWithPanel, focusComposerStable, isCoarsePointer]);
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- window focus listener that refocuses the composer after the window regains focus on a fine pointer
   useEffect(() => {
