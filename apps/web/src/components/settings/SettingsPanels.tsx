@@ -603,6 +603,9 @@ export function useSettingsRestore(onRestored?: () => void) {
       ? ["Diff whitespace changes"]
       : []),
     ...(settings.diffLayout !== DEFAULT_UNIFIED_SETTINGS.diffLayout ? ["Diff layout"] : []),
+    ...(settings.terminalDockRightPanel !== DEFAULT_UNIFIED_SETTINGS.terminalDockRightPanel
+      ? ["Dock terminal in right panel"]
+      : []),
     ...(settings.proactivePanelsEnabled !== DEFAULT_UNIFIED_SETTINGS.proactivePanelsEnabled
       ? ["Proactive panels"]
       : []),
@@ -729,6 +732,7 @@ export function useSettingsRestore(onRestored?: () => void) {
       diffFilesCollapsed: DEFAULT_UNIFIED_SETTINGS.diffFilesCollapsed,
       diffIgnoreWhitespace: DEFAULT_UNIFIED_SETTINGS.diffIgnoreWhitespace,
       diffLayout: DEFAULT_UNIFIED_SETTINGS.diffLayout,
+      terminalDockRightPanel: DEFAULT_UNIFIED_SETTINGS.terminalDockRightPanel,
       proactivePanelsEnabled: DEFAULT_UNIFIED_SETTINGS.proactivePanelsEnabled,
       showSkillsInSlashMenu: DEFAULT_UNIFIED_SETTINGS.showSkillsInSlashMenu,
       composerCollapseOnScroll: DEFAULT_UNIFIED_SETTINGS.composerCollapseOnScroll,
@@ -2633,6 +2637,31 @@ export function GeneralSettingsPanel() {
                 </SelectItem>
               </SelectPopup>
             </Select>
+          }
+        />
+        <SettingsRow
+          {...searchableSetting("terminal-dock-right-panel")}
+          description="Show the terminal at the bottom of the right panel instead of under the chat. Applies when the panel sits beside the chat."
+          resetAction={
+            settings.terminalDockRightPanel !== DEFAULT_UNIFIED_SETTINGS.terminalDockRightPanel ? (
+              <SettingResetButton
+                label="terminal position"
+                onClick={() =>
+                  updateSettings({
+                    terminalDockRightPanel: DEFAULT_UNIFIED_SETTINGS.terminalDockRightPanel,
+                  })
+                }
+              />
+            ) : null
+          }
+          control={
+            <Switch
+              checked={settings.terminalDockRightPanel}
+              onCheckedChange={(checked) =>
+                updateSettings({ terminalDockRightPanel: Boolean(checked) })
+              }
+              aria-label="Dock terminal in right panel"
+            />
           }
         />
 

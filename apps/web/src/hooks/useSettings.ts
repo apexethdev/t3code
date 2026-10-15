@@ -87,7 +87,8 @@ function emitClientSettingsHydrationChange() {
   }
 }
 
-function getClientSettingsSnapshot(): ClientSettings {
+/** Current client settings for one-off reads outside React, such as a click handler. */
+export function getClientSettingsSnapshot(): ClientSettings {
   return clientSettingsSnapshot;
 }
 
