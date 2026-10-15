@@ -50,7 +50,8 @@ import { isTerminalFocused, subscribeToTerminalFocusChanges } from "../lib/termi
 import { isPreviewFocused } from "../lib/previewFocus";
 import { isModelPickerOpen, subscribeToModelPickerVisibility } from "../modelPickerVisibility";
 import { shortcutModifierStore } from "../shortcutModifierState";
-import { selectThreadTerminalUiState, useTerminalUiStateStore } from "../terminalUiStateStore";
+import { useTerminalUiStateStore } from "../terminalUiStateStore";
+import { getThreadTerminalVisibleSnapshot } from "../hooks/useThreadTerminalVisible";
 import { selectActiveRightPanel, useRightPanelStore } from "../rightPanelStore";
 
 export function shouldNavigateAfterThreadPark(input: {
@@ -684,12 +685,7 @@ type ThreadStatusInput = Pick<
 export function threadShortcutContext(routeThreadRef: ScopedThreadRef | null) {
   return {
     terminalFocus: isTerminalFocused(),
-    terminalOpen:
-      routeThreadRef !== null &&
-      selectThreadTerminalUiState(
-        useTerminalUiStateStore.getState().terminalUiStateByThreadKey,
-        routeThreadRef,
-      ).terminalOpen,
+    terminalOpen: getThreadTerminalVisibleSnapshot(routeThreadRef),
     previewFocus: isPreviewFocused(),
     previewOpen:
       selectActiveRightPanel(useRightPanelStore.getState().byThreadKey, routeThreadRef) ===

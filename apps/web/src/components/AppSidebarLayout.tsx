@@ -28,7 +28,7 @@ import { isPreviewFocused } from "../lib/previewFocus";
 import { isTerminalFocused } from "../lib/terminalFocus";
 import { isModelPickerOpen } from "../modelPickerVisibility";
 import { selectActiveRightPanel, useRightPanelStore } from "../rightPanelStore";
-import { selectThreadTerminalUiState, useTerminalUiStateStore } from "../terminalUiStateStore";
+import { getThreadTerminalVisibleSnapshot } from "../hooks/useThreadTerminalVisible";
 import { cn, isMacPlatform } from "../lib/utils";
 import { primaryServerKeybindingsAtom } from "../state/server";
 import { useEnvironmentIdentificationMode } from "../hooks/useSettings";
@@ -137,10 +137,7 @@ function readRoutePanelsOpen(router: AnyRouter) {
   const routeThreadRef = resolveThreadRouteRef(router.state.matches.at(-1)?.params ?? {});
   if (!routeThreadRef) return { terminalOpen: false, previewOpen: false };
   return {
-    terminalOpen: selectThreadTerminalUiState(
-      useTerminalUiStateStore.getState().terminalUiStateByThreadKey,
-      routeThreadRef,
-    ).terminalOpen,
+    terminalOpen: getThreadTerminalVisibleSnapshot(routeThreadRef),
     previewOpen:
       selectActiveRightPanel(useRightPanelStore.getState().byThreadKey, routeThreadRef) ===
       "preview",
