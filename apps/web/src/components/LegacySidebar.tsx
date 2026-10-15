@@ -94,7 +94,7 @@ import {
   useThreadShellsForProjectRefs,
   waitForProjectRemoval,
 } from "../state/entities";
-import { selectThreadTerminalUiState, useTerminalUiStateStore } from "../terminalUiStateStore";
+import { useThreadTerminalVisible } from "../hooks/useThreadTerminalVisible";
 import { useThreadRunningTerminalIds } from "../state/terminalSessions";
 import { useThreadDiscoveredPorts } from "../portDiscoveryState";
 import { openDiscoveredPort } from "./preview/openDiscoveredPort";
@@ -3249,11 +3249,7 @@ export default function LegacySidebar() {
   );
   const routeThreadRef = resolveActiveThreadRouteRef(routeTarget, routeDraftThread);
   const routeThreadKey = routeThreadRef ? scopedThreadKey(routeThreadRef) : null;
-  const routeTerminalOpen = useTerminalUiStateStore((state) =>
-    routeThreadRef
-      ? selectThreadTerminalUiState(state.terminalUiStateByThreadKey, routeThreadRef).terminalOpen
-      : false,
-  );
+  const routeTerminalOpen = useThreadTerminalVisible(routeThreadRef);
   const keybindings = useAtomValue(primaryServerKeybindingsAtom);
   const [expandedThreadListsByProject, setExpandedThreadListsByProject] = useState<
     ReadonlySet<string>
