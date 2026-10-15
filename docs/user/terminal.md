@@ -28,3 +28,9 @@ To preserve those flags or enable queries with `query-term`, include them in
 `fish_features` in the environment that launches T3 Code. A shell export applies
 when you launch T3 Code from that shell; it does not configure a desktop app
 launched from the Dock or Finder. Enabling queries can restore the startup wait.
+
+## Position
+
+On web and desktop, **Dock terminal in right panel** in General settings shows the terminal drawer
+at the bottom of the right panel instead of under the chat; it hides with the panel, and the
+terminal shortcut (`mod+j` by default) reopens both.

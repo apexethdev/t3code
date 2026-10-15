@@ -34,6 +34,8 @@ import { resolveDiscoveredServerUrl } from "../../browser/browserTargetResolver"
 import { stackedThreadToast, toastManager } from "../ui/toast";
 import { confirmTerminalClose } from "../../lib/terminalCloseConfirm";
 import { findReusableProjectScriptTerminal } from "../../lib/projectScriptTerminal";
+import { openThreadTerminalDrawer, showTerminalDockPanel } from "../../lib/revealThreadTerminal";
+import { resolveTerminalToggle } from "../../lib/terminalDock";
 import { type TerminalContextSelection } from "../../lib/terminalContext";
 import {
   focusActiveDrawerTerminal,
@@ -62,6 +64,11 @@ export interface TerminalLaunchContext {
 
 interface ChatTerminalActionsInput {
   readonly environmentId: EnvironmentId;
+  /** Setting on and inline layout: the drawer renders in, and hides with, the right panel. */
+  readonly terminalDockEligible: boolean;
+  readonly rightPanelOpen: boolean;
+  /** The drawer as the user sees it; a docked drawer is hidden while its panel is closed. */
+  readonly terminalVisible: boolean;
   readonly composerRef: ComposerHandleRef;
   readonly terminalUiState: ReturnType<typeof selectThreadTerminalUiState>;
   readonly activeThread: EnvironmentThreadShell | undefined;
@@ -86,6 +93,9 @@ interface ChatTerminalActionsInput {
 export function useChatTerminalActions(input: ChatTerminalActionsInput) {
   const {
     environmentId,
+    terminalDockEligible,
+    rightPanelOpen,
+    terminalVisible,
     composerRef,
     terminalUiState,
     activeThread,
@@ -142,13 +152,24 @@ export function useChatTerminalActions(input: ChatTerminalActionsInput) {
   const setTerminalOpenStable = useStableCallback(setTerminalOpen);
   const toggleTerminalVisibility = () => {
     if (!activeThreadRef) return;
-    const nextOpen = !terminalUiState.terminalOpen;
+    const { open: nextOpen, showRightPanel } = resolveTerminalToggle({
+      dockEligible: terminalDockEligible,
+      rightPanelOpen,
+      terminalOpen: terminalUiState.terminalOpen,
+    });
     if (
       nextOpen &&
       !readEnvironmentScope(environmentId, AuthTerminalReadScope) &&
       !hasTerminalWriteAccess()
     )
       return;
+    if (showRightPanel) useRightPanelStore.getState().show(activeThreadRef);
+    // Already open but hidden with the closed panel: showing the panel reveals it,
+    // and the focus request waits for the docked viewport to mount.
+    if (nextOpen && terminalUiState.terminalOpen) {
+      focusActiveDrawerTerminal(activeThreadRef);
+      return;
+    }
     if (nextOpen && hasTerminalWriteAccess() && terminalUiState.terminalIds.length === 0) {
       // Server-created setup terminals exist before this client's drawer mounts.
       // Reuse them before allocating a shell from the still-empty UI state.
@@ -257,6 +278,7 @@ export function useChatTerminalActions(input: ChatTerminalActionsInput) {
       ...(options?.env ? { extraEnv: options.env } : {}),
     });
     if (!launched) return;
+    showTerminalDockPanel(activeThreadRef, terminalDockEligible);
     const targetTerminalId = launched.terminalId;
     focusTerminal(activeThreadRef, targetTerminalId);
     const openResult = await launched.result;
@@ -398,13 +420,13 @@ export function useChatTerminalActions(input: ChatTerminalActionsInput) {
   };
   const requestClosePanelTerminalStable = useStableCallback(requestClosePanelTerminal);
   const openTerminalIfClosed = () => {
-    if (!terminalUiState.terminalOpen) setTerminalOpen(true);
+    if (activeThreadRef) openThreadTerminalDrawer(activeThreadRef, terminalDockEligible);
   };
   // A focused right-panel terminal takes the split/new/close chords; otherwise they act on the drawer.
   const shortcuts = {
     "terminal.toggle": () => {
       if (
-        !terminalUiState.terminalOpen &&
+        !terminalVisible &&
         !readEnvironmentScope(environmentId, AuthTerminalReadScope) &&
         !hasTerminalWriteAccess()
       )
@@ -429,7 +451,7 @@ export function useChatTerminalActions(input: ChatTerminalActionsInput) {
         requestClosePanelTerminal(activeRightPanelSurface.activeTerminalId);
         return;
       }
-      if (terminalUiState.terminalOpen) requestCloseTerminal(terminalUiState.activeTerminalId);
+      if (terminalVisible) requestCloseTerminal(terminalUiState.activeTerminalId);
     },
     "terminal.new": ({ terminalFocusOwner }) => {
       if (!hasTerminalWriteAccess()) return false;
