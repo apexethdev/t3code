@@ -210,6 +210,7 @@ vi.mock("../hooks/useSettings", async () => {
       select(DEFAULT_CLIENT_SETTINGS),
     ensureClientSettingsHydrated: async () => {},
     getClientSettings: () => DEFAULT_CLIENT_SETTINGS,
+    getClientSettingsSnapshot: () => DEFAULT_CLIENT_SETTINGS,
   };
 });
 
