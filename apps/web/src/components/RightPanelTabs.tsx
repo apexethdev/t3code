@@ -171,6 +171,8 @@ export interface RightPanelTabsProps {
   /** Overrides the default reason while side chats are available but cannot start. */
   sideChatDisabledReason?: string | null;
   pullRequestStatusSeeds?: Readonly<Record<string, PullRequestTabStatusSeed>>;
+  /** Pinned below the active surface; the docked terminal drawer renders here. */
+  footer?: ReactNode;
   children: ReactNode;
 }
 
@@ -1712,6 +1714,7 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
           props.children
         )}
       </div>
+      {props.footer}
     </PreviewPanelShell>
   );
 }

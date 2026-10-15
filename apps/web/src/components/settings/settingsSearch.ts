@@ -810,6 +810,12 @@ export const SETTINGS_SEARCH_ITEMS = [
     searchTerms: [msg("stacked split side by side unified inline view")],
   },
   {
+    id: "terminal-dock-right-panel",
+    title: msg("Dock terminal in right panel"),
+    to: "/settings/general",
+    searchTerms: [msg("terminal drawer bottom position layout ide")],
+  },
+  {
     id: "proactive-panels",
     title: msg("Open pull requests and changes panels proactively"),
     to: "/settings/diffs",
