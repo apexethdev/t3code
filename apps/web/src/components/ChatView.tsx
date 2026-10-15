@@ -4725,15 +4725,22 @@ export default function ChatView(props: ChatViewProps) {
     showScrollDebouncer.current.cancel();
   }, [timelineThreadReset]);
 
+  // Keyed to thread changes and real drawer closes. A docked drawer hiding with
+  // its closed panel is left to the visibility effect below, which keeps focus
+  // the user placed outside the dock.
+  const isTerminalVisibleNow = useEffectEvent(() => terminalVisible);
   useEffect(() => {
-    if (!activeThread?.id || terminalVisible) return;
+    if (!activeThread?.id || (terminalUiState.terminalOpen && isTerminalVisibleNow())) return;
     const frame = window.requestAnimationFrame(() => {
+      // The panel can open before this frame, e.g. proactively on thread entry,
+      // revealing the docked drawer and handing it focus.
+      if (isTerminalVisibleNow()) return;
       focusComposerStable();
     });
     return () => {
       window.cancelAnimationFrame(frame);
     };
-  }, [activeThread?.id, focusComposerStable, terminalVisible]);
+  }, [activeThread?.id, focusComposerStable, terminalUiState.terminalOpen]);
 
   useEffect(() => {
     if (!activeThread?.id || terminalVisible || isMobileViewport) return;
