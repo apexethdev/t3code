@@ -8088,6 +8088,7 @@ export default function ChatView(props: ChatViewProps) {
         threadId={mountedThreadRef.threadId}
         active={mountedThreadKey === activeThreadKey}
         composerHeight={mountedThreadKey === activeThreadKey ? composerReservedHeight : 0}
+        docked={terminalDockEligible}
         launchContext={
           mountedThreadKey === activeThreadKey ? (activeTerminalLaunchContext ?? null) : null
         }

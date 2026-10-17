@@ -32,5 +32,6 @@ launched from the Dock or Finder. Enabling queries can restore the startup wait.
 ## Position
 
 On web and desktop, **Dock terminal in right panel** in General settings shows the terminal drawer
-at the bottom of the right panel instead of under the chat; it hides with the panel, and the
-terminal shortcut (`mod+j` by default) reopens both.
+at the bottom of the right panel instead of under the chat. It's on by default; turn it off to keep
+the terminal under the chat. A docked terminal hides with the panel, and the terminal shortcut
+(`mod+j` by default) reopens both.
