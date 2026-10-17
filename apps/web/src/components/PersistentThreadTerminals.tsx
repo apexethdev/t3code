@@ -77,6 +77,7 @@ interface PersistentThreadTerminalDrawerProps {
   threadRef: { environmentId: EnvironmentId; threadId: ThreadId };
   threadId: ThreadId;
   active: boolean;
+  docked: boolean;
   composerHeight: number;
   launchContext: PersistentTerminalLaunchContext | null;
   splitShortcutLabel: string | undefined;
@@ -91,6 +92,7 @@ export const PersistentThreadTerminalDrawer = memo(function PersistentThreadTerm
   threadRef,
   threadId,
   active,
+  docked,
   composerHeight,
   launchContext,
   splitShortcutLabel,
@@ -250,6 +252,7 @@ export const PersistentThreadTerminalDrawer = memo(function PersistentThreadTerm
     >
       <div className="min-h-0 overflow-clip">
         <ThreadTerminalDrawer
+          docked={docked}
           threadRef={threadRef}
           threadId={threadId}
           cwd={cwd}

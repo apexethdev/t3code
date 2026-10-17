@@ -3309,6 +3309,7 @@ export default function ChatView(props: ChatViewProps) {
     <ChatTerminalDrawers
       activeThreadKey={activeThreadKey}
       activeTerminalOpen={Boolean(terminalUiState.terminalOpen)}
+      docked={terminalDockEligible}
       composerHeight={composerReservedHeight}
       launchContext={activeTerminalLaunchContext ?? null}
       splitShortcutLabel={splitTerminalShortcutLabel ?? undefined}
