@@ -163,12 +163,12 @@ describe("ClientSettings rich text composer", () => {
 });
 
 describe("ClientSettings terminal dock", () => {
-  it("keeps the terminal under the chat for settings saved before the option existed", () => {
-    expect(decodeClientSettings({}).terminalDockRightPanel).toBe(false);
+  it("docks the terminal for settings saved before the option existed", () => {
+    expect(decodeClientSettings({}).terminalDockRightPanel).toBe(true);
   });
 
-  it("persists an opt-in through patches and storage", () => {
-    const preference = { terminalDockRightPanel: true };
+  it("persists an opt-out through patches and storage", () => {
+    const preference = { terminalDockRightPanel: false };
     expect(decodeClientSettingsPatch(preference)).toEqual(preference);
     expect(encodeClientSettings(decodeClientSettings(preference))).toMatchObject(preference);
   });

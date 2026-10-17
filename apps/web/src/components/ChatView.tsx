@@ -982,6 +982,7 @@ interface PersistentThreadTerminalDrawerProps {
   threadRef: { environmentId: EnvironmentId; threadId: ThreadId };
   threadId: ThreadId;
   active: boolean;
+  docked: boolean;
   launchContext: PersistentTerminalLaunchContext | null;
   focusRequestId: number;
   splitShortcutLabel: string | undefined;
@@ -996,6 +997,7 @@ const PersistentThreadTerminalDrawer = memo(function PersistentThreadTerminalDra
   threadRef,
   threadId,
   active,
+  docked,
   launchContext,
   focusRequestId,
   splitShortcutLabel,
@@ -1347,6 +1349,7 @@ const PersistentThreadTerminalDrawer = memo(function PersistentThreadTerminalDra
     >
       <div className="min-h-0 overflow-clip">
         <ThreadTerminalDrawer
+          docked={docked}
           threadRef={threadRef}
           threadId={threadId}
           cwd={cwd}
@@ -11094,6 +11097,7 @@ export default function ChatView(props: ChatViewProps) {
         threadRef={mountedThreadRef}
         threadId={mountedThreadRef.threadId}
         active={mountedThreadKey === activeThreadKey}
+        docked={terminalDockEligible}
         launchContext={
           mountedThreadKey === activeThreadKey ? (activeTerminalLaunchContext ?? null) : null
         }

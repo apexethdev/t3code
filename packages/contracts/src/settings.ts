@@ -397,7 +397,7 @@ export const ClientSettingsSchema = Schema.Struct({
   diffFilesCollapsed: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(true))),
   diffIgnoreWhitespace: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(true))),
   diffLayout: DiffLayout.pipe(Schema.withDecodingDefault(Effect.succeed(DEFAULT_DIFF_LAYOUT))),
-  terminalDockRightPanel: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
+  terminalDockRightPanel: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(true))),
   environmentIdentificationMode: EnvironmentIdentificationMode.pipe(
     Schema.withDecodingDefault(Effect.succeed(DEFAULT_ENVIRONMENT_IDENTIFICATION_MODE)),
   ),
