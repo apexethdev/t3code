@@ -99,8 +99,10 @@ Also confirm there is no `app-update.yml` in `Contents/Resources`.
 ### 3. Install (needs the owner)
 
 1. Ask the owner to quit T3 Code. Quitting ends any agent sessions running in it.
-2. If you don't have a backup of the official app for this version yet, make one, e.g.
-   `ditto` it to `~/development/t3code-official-X.Y.Z.app`.
+2. If you don't have a backup of the official app for this version yet, `ditto` it into
+   `.backups/` in this checkout, e.g. `.backups/t3code-official-X.Y.Z.app`. Keep data
+   tarballs there too. `.backups/` is ignored locally through `.git/info/exclude`; add that line
+   on a fresh clone.
 3. Replace `/Applications/T3 Code (Beta).app` with the app from the DMG. Then run
    `xattr -dr com.apple.quarantine` on it and launch it.
 
