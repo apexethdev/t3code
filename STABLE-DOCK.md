@@ -10,8 +10,9 @@ Read this before rebasing, rebuilding, or reinstalling. Do not open PRs upstream
 
 - `stable-dock` = `<latest stable tag>` + the dock patch + this file. Never base it on `main`;
   `main` is the nightly track.
-- The dock patch: `feat(web): option to dock the terminal under the right panel` plus three
-  follow-up `fix(web)` commits. They touch mostly `apps/web`, plus one setting in
+- The dock patch: `feat(web): option to dock the terminal under the right panel` plus its
+  follow-up `fix(web)`/`feat(web)` commits, including a "Terminal" header for the docked drawer and
+  the setting defaulting to on. They touch mostly `apps/web`, plus one setting in
   `packages/contracts`.
 - Remotes: `origin` is the owner's public fork. Upstream is `https://github.com/pingdotgg/t3code`.
   Add it as `upstream` if it's missing.
