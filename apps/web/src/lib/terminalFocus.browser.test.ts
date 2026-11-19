@@ -116,7 +116,7 @@ function mountThread(threadId: string, environmentId = "env") {
 
 describe("thread focus restoration", () => {
   it.each(["composer", "drawer", "panel", "remounted composer"] as const)(
-    "restores %s focus when returning to a thread with both terminals open",
+    "focuses the composer when returning to a thread left with %s focus and both terminals open",
     (control) => {
       using thread = mountThread(`return-${control}`);
       using drawer = thread.mountTerminal("drawer");
@@ -142,18 +142,12 @@ describe("thread focus restoration", () => {
       using remountedThread = remount ? mountThread(`return-${control}`) : undefined;
       const returnedThread = remountedThread ?? thread;
       returnedThread.root.hidden = false;
-      using remountedDrawer = returnedThread.mountTerminal("drawer");
+      using _remountedDrawer = returnedThread.mountTerminal("drawer");
       using remountedPanel = returnedThread.mountTerminal("panel");
       if (control === "panel") document.body.append(remountedPanel.input);
       using _leave = { [Symbol.dispose]: returnedThread.enter() };
-      const expected =
-        control === "composer" || remount
-          ? returnedThread.composer
-          : control === "drawer"
-            ? remountedDrawer.input
-            : remountedPanel.input;
 
-      expect(document.activeElement).toBe(expected);
+      expect(document.activeElement).toBe(returnedThread.composer);
     },
   );
 
@@ -187,18 +181,5 @@ describe("thread focus restoration", () => {
     consumePendingTerminalFocus(thread.ref, "drawer");
 
     expect(document.activeElement).toBe(drawer.input);
-  });
-
-  it("falls back to the composer when the remembered drawer terminal was closed", () => {
-    using thread = mountThread("closed-remembered");
-    using drawer = thread.mountTerminal("drawer");
-    const leave = thread.enter();
-    expect(document.activeElement).toBe(drawer.input);
-    leave();
-    useTerminalUiStateStore.getState().setTerminalOpen(thread.ref, false);
-    thread.drawerState.visible = false;
-    using _leave = { [Symbol.dispose]: thread.enter() };
-
-    expect(document.activeElement).toBe(thread.composer);
   });
 });

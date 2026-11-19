@@ -19,12 +19,12 @@ const threadRef = (threadId: string) =>
   scopeThreadRef(EnvironmentId.make("env"), ThreadId.make(threadId));
 
 // Node has no DOM; entry only listens on the root's document for focus changes.
-const enterThread = (ref: ReturnType<typeof threadRef>) =>
+const enterThread = (ref: ReturnType<typeof threadRef>, focusComposer = () => {}) =>
   restoreFocusOnThreadEnter(ref, {
     root: {
       ownerDocument: Object.assign(new EventTarget(), { activeElement: null }),
     } as unknown as HTMLElement,
-    focusComposer: () => {},
+    focusComposer,
   });
 
 describe("focusTerminal", () => {
@@ -176,15 +176,17 @@ describe("focusTerminal", () => {
     unregister();
   });
 
-  it("entering a thread with its drawer open focuses the active drawer terminal", () => {
+  it("entering a thread with its drawer open focuses the composer, not the drawer terminal", () => {
     const ref = threadRef("entered");
     useTerminalUiStateStore.getState().ensureTerminal(ref, "a", { open: true, active: true });
     const focus = vi.fn(() => true);
     const unregister = registerTerminalFocusTarget({ threadRef: ref, terminalId: "a", focus });
+    const composer = vi.fn();
 
-    const leave = enterThread(ref);
+    const leave = enterThread(ref, composer);
 
-    expect(focus).toHaveBeenCalledTimes(1);
+    expect(focus).not.toHaveBeenCalled();
+    expect(composer).toHaveBeenCalledTimes(1);
     leave();
     unregister();
   });
@@ -217,7 +219,7 @@ describe("focusTerminal", () => {
     unregisterPanel();
   });
 
-  it("re-entering a thread after in-thread terminal actions focuses the drawer", () => {
+  it("re-entering a thread after in-thread terminal actions focuses the composer", () => {
     const ref = threadRef("re-entered");
     useTerminalUiStateStore.getState().ensureTerminal(ref, "drawer", { open: true, active: true });
     const drawer = vi.fn(() => true);
@@ -232,9 +234,11 @@ describe("focusTerminal", () => {
     focusTerminalOnNavigation(ref, "drawer");
     leaveFirst();
     drawer.mockClear();
-    const leaveSecond = enterThread(ref);
+    const composer = vi.fn();
+    const leaveSecond = enterThread(ref, composer);
 
-    expect(drawer).toHaveBeenCalledTimes(1);
+    expect(drawer).not.toHaveBeenCalled();
+    expect(composer).toHaveBeenCalledTimes(1);
     leaveSecond();
     unregisterDrawer();
   });
@@ -251,9 +255,11 @@ describe("focusTerminal", () => {
       terminalId: "drawer",
       focus: drawer,
     });
-    const leave = enterThread(ref);
+    const composer = vi.fn();
+    const leave = enterThread(ref, composer);
 
-    expect(drawer).toHaveBeenCalledTimes(1);
+    expect(drawer).not.toHaveBeenCalled();
+    expect(composer).toHaveBeenCalledTimes(1);
     leave();
     unregisterDrawer();
   });

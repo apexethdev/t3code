@@ -37,7 +37,6 @@ interface TerminalFocusTarget {
 }
 
 const focusTargets = new Set<TerminalFocusTarget>();
-const lastThreadFocus = new Map<string, "composer" | { terminalId: string }>();
 // One request at a time: the newest terminal the user asked for wins, so an
 // older request never fires later and steals focus.
 let pendingFocus: { readonly threadKey: string; readonly terminalId: string } | null = null;
@@ -126,7 +125,7 @@ export function focusTerminalOnNavigation(threadRef: ScopedThreadRef, terminalId
   focusTerminal(threadRef, terminalId);
 }
 
-/** Restores composer or terminal focus; explicit terminal navigation takes precedence. */
+/** Focuses the composer on thread entry; only explicit terminal navigation lands in a terminal. */
 export function restoreFocusOnThreadEnter(
   threadRef: ScopedThreadRef,
   content: { readonly root: HTMLElement; readonly focusComposer: () => void },
@@ -136,54 +135,14 @@ export function restoreFocusOnThreadEnter(
     navigationRequestThreadKey === threadKey ||
     (lastEnteredThreadByRoot.get(content.root) === threadKey &&
       pendingFocus?.threadKey === threadKey);
-  if (!requestedByHandler) pendingFocus = null;
   lastEnteredThreadByRoot.set(content.root, threadKey);
   navigationRequestThreadKey = null;
   enteredThreadKey = threadKey;
-  const previous = lastThreadFocus.get(threadKey);
-  const remember = () => {
-    const element = content.root.ownerDocument.activeElement;
-    if (!element) return;
-    const terminal = Array.from(focusTargets).find((target) => target.element?.contains(element));
-    if (terminal) {
-      if (scopedThreadKey(terminal.threadRef) === threadKey)
-        lastThreadFocus.set(threadKey, { terminalId: terminal.terminalId });
-    } else if (
-      content.root.contains(element) &&
-      element.closest('[data-workspace-area="composer"]')
-    ) {
-      lastThreadFocus.set(threadKey, "composer");
-    }
-  };
-  content.root.ownerDocument.addEventListener("focusin", remember);
   if (!requestedByHandler) {
-    const drawer = selectThreadTerminalUiState(
-      useTerminalUiStateStore.getState().terminalUiStateByThreadKey,
-      threadRef,
-    );
-    const panel = selectThreadRightPanelState(useRightPanelStore.getState().byThreadKey, threadRef);
-    const panelTerminal = panel.isOpen
-      ? panel.surfaces.find((surface) => surface.id === panel.activeSurfaceId)
-      : null;
-    if (previous === "composer") {
-      content.focusComposer();
-    } else if (
-      previous &&
-      ((drawer.terminalOpen &&
-        drawer.terminalGroups
-          .find((group) => group.id === drawer.activeTerminalGroupId)
-          ?.terminalIds.includes(previous.terminalId)) ||
-        (panelTerminal?.kind === "terminal" &&
-          panelTerminal.terminalIds.includes(previous.terminalId)))
-    ) {
-      focusTerminal(threadRef, previous.terminalId);
-    } else if (drawer.terminalOpen && drawer.activeTerminalId) {
-      focusTerminal(threadRef, drawer.activeTerminalId);
-    } else content.focusComposer();
+    pendingFocus = null;
+    content.focusComposer();
   }
-  if (requestedByHandler) remember();
   return () => {
-    content.root.ownerDocument.removeEventListener("focusin", remember);
     // A handler navigating elsewhere marks its target before this cleanup runs.
     if (enteredThreadKey === threadKey) enteredThreadKey = null;
   };
