@@ -12975,5 +12975,10 @@
   "201490988858b511": "retirada por {by}",
   "99451a5d2d40440f": "Retirada por {by}.",
   "3ee30a50b70fffab": "Retirada por {by}: {reason}",
-  "92e129bf413a1220": "retirada"
+  "92e129bf413a1220": "retirada",
+  "b0e84e35de44a0c3": "Terminal",
+  "9a279946490a0af3": "Dock terminal in right panel",
+  "ac5cb8a38f669a5e": "Reset terminal position to default",
+  "67b675ad1172bded": "Show the terminal at the bottom of the right panel instead of under the chat. Applies when the panel sits beside the chat.",
+  "839c3f10f8d4af0e": "terminal drawer bottom position layout ide"
 }
